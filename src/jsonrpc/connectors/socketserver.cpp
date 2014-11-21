@@ -44,7 +44,7 @@ namespace jsonrpc {
     poolSize_(pool)
   {
     struct addrinfo hint;
-    memset((char*)&hint, 0, sizeof(addrinfo));
+    memset((char*)&hint, 0, sizeof(hint));
     hint.ai_family = AF_INET;
     hint.ai_socktype = type;
     hint.ai_flags = AI_PASSIVE;
@@ -90,7 +90,7 @@ error:
     SocketServer* server = (SocketServer*) data;
     std::vector<SocketServer::Connection*> clients;
     struct sockaddr_storage client_addr;
-    socklen_t addr_size = sizeof(sockaddr_storage);
+    socklen_t addr_size = sizeof(client_addr);
     MutexHandle lock;
     mutexCreate(&lock);
     int client_socket;
@@ -146,10 +146,10 @@ error:
   }
 
   void SocketServer::CreateSocket() throw (JsonRpcException) {
-    char yes = 1;
+    int yes = 1;
     socket_ = socket(host_info_->ai_family, host_info_->ai_socktype, host_info_->ai_protocol);
     CHECK_SOCKET(socket_);
-    CHECK_STATUS(setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)));
+    CHECK_STATUS(setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)));
     CHECK_STATUS(bind(socket_, host_info_->ai_addr, host_info_->ai_addrlen));
     CHECK_STATUS(listen(socket_, poolSize_));
     return;
