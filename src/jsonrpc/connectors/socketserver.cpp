@@ -138,7 +138,7 @@ error:
   }
 
   void SocketServer::CreateSocket() throw (JsonRpcException) {
-    int yes = 1;
+    char yes = 1;
     socket_ = socket(host_info_->ai_family, host_info_->ai_socktype, host_info_->ai_protocol);
     CHECK_SOCKET(socket_);
     CHECK_STATUS(setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)));
