@@ -19,11 +19,12 @@
 #define _<STUBNAME>_H_\n\
 \n\
 #include <jsonrpc/rpc.h>\n\
+#include <memory>\n\
 \n\
 class <stubname> : public jsonrpc::AbstractServer<<stubname>>\n\
 {\n\
     public:\n\
-        <stubname>(jsonrpc::AbstractServerConnector* conn) :\n\
+        <stubname>(std::tr1::shared_ptr<jsonrpc::AbstractServerConnector> conn) :\n\
             jsonrpc::AbstractServer<<stubname>>(conn) \n\
         {\n\
 <procedurebindings>\n\

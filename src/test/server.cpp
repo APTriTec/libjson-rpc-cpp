@@ -13,18 +13,18 @@
 using namespace std;
 using namespace jsonrpc;
 
-TestServer::TestServer(AbstractServerConnector* connection) : AbstractServer<TestServer>(connection)
+TestServer::TestServer(std::tr1::shared_ptr<AbstractServerConnector> connection) : AbstractServer<TestServer>(connection)
 {
     initialize();
 }
 
 #if HTTP_CONNECTOR
-TestServer::TestServer() : AbstractServer<TestServer>(new HttpServer(8080))
+TestServer::TestServer() : AbstractServer<TestServer>(std::tr1::shared_ptr<HttpServer>(new HttpServer(8080)))
 {
     initialize();
 }
 #elif SOCKET_CONNECTOR
-TestServer::TestServer() : AbstractServer<TestServer>(new SocketServer("8080"))
+TestServer::TestServer() : AbstractServer<TestServer>(std::tr1::shared_ptr<SocketServer>(new SocketServer("8080")))
 {
     initialize();
 }

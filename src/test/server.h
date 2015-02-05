@@ -17,7 +17,7 @@
     {
         public:
             TestServer();
-            TestServer(jsonrpc::AbstractServerConnector* connection);
+            TestServer(std::tr1::shared_ptr<jsonrpc::AbstractServerConnector> connection);
 
             void sayHello(const Json::Value& request, Json::Value& response);
             void getCounterValue(const Json::Value& request, Json::Value& response);

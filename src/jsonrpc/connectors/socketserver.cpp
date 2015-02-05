@@ -2,29 +2,34 @@
 
 #include <cstring>
 #include <vector>
+#include <memory>
+
+#ifdef __INTIME__
+# include <tr1/_smartptr.h>
+#endif
 
 namespace jsonrpc {
 
-    void CloseConnection(const SocketServer::Connection* connection) {
+    typedef std::vector<std::tr1::shared_ptr<SocketServer::Connection>> clients_t;
+
+    void CloseConnection(std::tr1::shared_ptr<SocketServer::Connection>& connection) {
       shutdown(connection->socket, BOTH_DIRECTION);
       closesocket(connection->socket);
       threadJoin(connection->thread);
     }
 
-    void CloseAllConnections(std::vector<SocketServer::Connection*>& clients) {
-      for(std::vector<SocketServer::Connection*>::iterator it = clients.begin(); it != clients.end(); ++it ) {
+    void CloseAllConnections(clients_t& clients) {
+      for (clients_t::iterator it = clients.begin(); it != clients.end(); ++it) {
         CloseConnection(*it);
-        delete *it;
       }
       clients.clear();
     }
 
-    void CloseFinishedConnections(std::vector<SocketServer::Connection*>& clients) {
-      std::vector<SocketServer::Connection*>::iterator it = clients.begin();
+    void CloseFinishedConnections(clients_t& clients) {
+      clients_t::iterator it = clients.begin();
       while (it != clients.end()) {
           if ((*it)->finished) {
             CloseConnection(*it);
-            delete *it;
             it = clients.erase(it);
           }
           else
@@ -32,7 +37,7 @@ namespace jsonrpc {
       }
     }
 
-    void CloseOldestConnection(std::vector<SocketServer::Connection*>& clients) {
+    void CloseOldestConnection(clients_t& clients) {
       CloseConnection(clients.front());
       clients.erase(clients.begin());
     }
@@ -89,7 +94,7 @@ error:
  THREAD_ROUTINE_RETURN SocketServer::HandleConnections(void* data)
  {
     SocketServer* server = (SocketServer*) data;
-    std::vector<SocketServer::Connection*> clients;
+    std::vector<std::tr1::shared_ptr<SocketServer::Connection>> clients;
     struct sockaddr_storage client_addr;
     socklen_t addr_size = sizeof(client_addr);
     MutexHandle lock;
@@ -98,7 +103,7 @@ error:
 
     while (!server->shutdown_) {
       if ((client_socket = accept(server->socket_, (struct sockaddr*)&client_addr, &addr_size)) > 0) {
-        clients.push_back(new jsonrpc::SocketServer::Connection());
+        clients.push_back(std::tr1::shared_ptr<SocketServer::Connection>(new SocketServer::Connection()));
         clients.back()->socket = client_socket;
         clients.back()->pserver = server;
         clients.back()->plock_server = &lock;
@@ -106,7 +111,7 @@ error:
         if (clients.size() > server->poolSize_) {
           CloseOldestConnection(clients);
         }
-        threadCreate(&clients.back()->thread, (ThreadStartRoutine)ConnectionHandler, clients.back());
+        threadCreate(&clients.back()->thread, (ThreadStartRoutine)ConnectionHandler, clients.back().get());
       }
     }
     CloseAllConnections(clients);
@@ -138,10 +143,10 @@ error:
   }
 
   void SocketServer::CreateSocket() throw (JsonRpcException) {
-    char yes = 1;
+    int yes = 1;
     socket_ = socket(host_info_->ai_family, host_info_->ai_socktype, host_info_->ai_protocol);
     CHECK_SOCKET(socket_);
-    CHECK_STATUS(setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)));
+    CHECK_STATUS(setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, (char*)(&yes), sizeof(yes)));
     CHECK_STATUS(bind(socket_, host_info_->ai_addr, host_info_->ai_addrlen));
     CHECK_STATUS(listen(socket_, poolSize_));
     return;

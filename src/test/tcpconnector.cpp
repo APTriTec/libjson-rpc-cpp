@@ -30,8 +30,8 @@ int main(int argc, char** argv)
     WSAStartup(wVersionRequested, &wsaData);
 #endif
 
-    SocketServer server_connector = SocketServer("8888", SOCK_STREAM, 2);
-    TestServer server = TestServer(&server_connector);
+    std::tr1::shared_ptr<SocketServer> server_connector(new SocketServer("8888", SOCK_STREAM, 2));
+    TestServer server(server_connector);
     SocketClient client_connector = SocketClient("127.0.0.1", "8888");
     SocketClient client_connector2 = SocketClient("127.0.0.1", "8888");
     Client client = Client(&client_connector);

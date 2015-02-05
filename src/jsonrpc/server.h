@@ -12,7 +12,11 @@
 
 #include <map>
 #include <string>
-#include <vector>
+#include <memory>
+
+#ifdef __INTIME__
+# include <tr1/_smartptr.h>
+#endif
 
 #include "rpcprotocolserver.h"
 #include "serverconnector.h"
@@ -26,16 +30,17 @@ namespace jsonrpc
             typedef void(S::*methodPointer_t)(const Json::Value &parameter, Json::Value &result);
             typedef void(S::*notificationPointer_t)(const Json::Value &parameter);
 
-            AbstractServer(AbstractServerConnector *connector) :
-                connection(connector),
+            AbstractServer(std::tr1::shared_ptr<AbstractServerConnector> connector)
+              : connection(connector),
                 handler(this)
             {
                 connector->SetHandler(this->handler);
             }
 
-            AbstractServer(const std::string &configfile, AbstractServerConnector *connector) :
-                handler(this, SpecificationParser::GetProceduresFromFile(configfile)),
-                connection(connector)
+            AbstractServer(const std::string &configfile, std::tr1::shared_ptr<AbstractServerConnector> connector)
+              : connection(connector),
+                handler(this, SpecificationParser::GetProceduresFromFile(configfile))
+                
             {
                 connector->SetHandler(this->handler);
             }
@@ -43,8 +48,10 @@ namespace jsonrpc
             virtual ~AbstractServer()
             {
                 this->StopListening();
-//                delete this->connection;
             }
+
+            AbstractServer(AbstractServer const &) = delete;
+            AbstractServer& operator=(AbstractServer const&) = delete;
 
             /**
              * @brief StartListening starts the AbstractServerConnector to listen for incoming requests.
@@ -130,7 +137,7 @@ namespace jsonrpc
             }
 
         private:
-            AbstractServerConnector* connection;
+            std::tr1::shared_ptr<AbstractServerConnector> connection;
             RpcProtocolServer handler;
             std::map<std::string, methodPointer_t> methods;
             std::map<std::string, notificationPointer_t> notifications;
