@@ -8,7 +8,7 @@
  ************************************************************************/
 
 #include "rpcprotocolserver12.h"
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 using namespace jsonrpc;
 

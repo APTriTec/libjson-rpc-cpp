@@ -14,7 +14,7 @@
 #include <jsonrpccpp/client.h>
 #include <jsonrpccpp/common/specificationparser.h>
 
-#include <argtable2.h>
+#include <argtable3.h>
 #include "helper/cpphelper.h"
 #include "client/cppclientstubgenerator.h"
 #include "client/jsclientstubgenerator.h"

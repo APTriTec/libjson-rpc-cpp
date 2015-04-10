@@ -13,7 +13,7 @@
 #include <map>
 #include <string>
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 namespace jsonrpc
 {   
