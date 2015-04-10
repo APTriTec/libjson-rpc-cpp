@@ -30,6 +30,7 @@ set(server_connector_header "")
 set(server_connector_libs   "")
 
 include_directories("${PROJECT_SOURCE_DIR}/src/")
+include_directories(${JSONCPP_INCLUDE_DIRS})
 
 # configure a header file to pass some of the CMake settings
 # to the source code
