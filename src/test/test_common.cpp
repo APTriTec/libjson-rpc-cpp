@@ -7,11 +7,9 @@
  * @license See attached LICENSE.txt
  ************************************************************************/
 
+#define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 #include <jsonrpccpp/common/procedure.h>
-
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE
 
 using namespace jsonrpc;
 using namespace std;

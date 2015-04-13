@@ -13,7 +13,7 @@
 using namespace std;
 using namespace jsonrpc;
 
-TestServer::TestServer(AbstractServerConnector &connector, serverVersion_t type) :
+TestServer::TestServer(mem::shared_ptr<AbstractServerConnector> connector, serverVersion_t type) :
     AbstractServer<TestServer>(connector, type),
     cnt(-1)
 {

@@ -18,7 +18,7 @@
 class TestServer : public jsonrpc::AbstractServer<TestServer>
 {
     public:
-        TestServer(jsonrpc::AbstractServerConnector &connector, jsonrpc::serverVersion_t type = jsonrpc::JSONRPC_SERVER_V2);
+        TestServer(mem::shared_ptr<jsonrpc::AbstractServerConnector> connector, jsonrpc::serverVersion_t type = jsonrpc::JSONRPC_SERVER_V2);
 
         void sayHello(const Json::Value& request, Json::Value& response);
         void getCounterValue(const Json::Value& request, Json::Value& response);

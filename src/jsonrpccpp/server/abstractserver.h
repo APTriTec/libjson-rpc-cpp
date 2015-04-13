@@ -19,6 +19,14 @@
 #include "iclientconnectionhandler.h"
 #include "requesthandlerfactory.h"
 
+#include <memory>
+#ifdef __INTIME__
+# include <tr1/_smartptr.h>
+  namespace mem = std::tr1;
+#else
+  namespace mem = std;
+#endif
+
 namespace jsonrpc
 {
 
@@ -29,11 +37,11 @@ namespace jsonrpc
             typedef void(S::*methodPointer_t)       (const Json::Value &parameter, Json::Value &result);
             typedef void(S::*notificationPointer_t) (const Json::Value &parameter);
 
-            AbstractServer(AbstractServerConnector &connector, serverVersion_t type = JSONRPC_SERVER_V2) :
+            AbstractServer(mem::shared_ptr<AbstractServerConnector> connector, serverVersion_t type = JSONRPC_SERVER_V2) :
                 connection(connector)
             {
                 this->handler = RequestHandlerFactory::createProtocolHandler(type, *this);
-                connector.SetHandler(this->handler);
+                connector->SetHandler(this->handler);
             }
 
             virtual ~AbstractServer()
@@ -43,12 +51,12 @@ namespace jsonrpc
 
             bool StartListening()
             {
-                return connection.StartListening();
+                return connection->StartListening();
             }
 
             bool StopListening()
             {
-                return connection.StopListening();
+                return connection->StopListening();
             }
 
             virtual void HandleMethodCall(Procedure &proc, const Json::Value& input, Json::Value& output)
@@ -88,7 +96,7 @@ namespace jsonrpc
             }
 
         private:
-            AbstractServerConnector                         &connection;
+            mem::shared_ptr<AbstractServerConnector>        connection;
             IProtocolHandler                                *handler;
             std::map<std::string, methodPointer_t>          methods;
             std::map<std::string, notificationPointer_t>    notifications;

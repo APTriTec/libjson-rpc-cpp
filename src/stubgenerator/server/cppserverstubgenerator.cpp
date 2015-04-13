@@ -18,7 +18,7 @@
 #define TEMPLATE_CPPSERVER_NOTIFICATIONBINDING "this->bindAndAddNotification(new jsonrpc::Procedure(\"<rpcprocedurename>\", <paramtype>, <parameterlist> NULL), &<stubname>::<procedurename>I);"
 
 #define TEMPLATE_CPPSERVER_SIGCLASS "class <stubname> : public jsonrpc::AbstractServer<<stubname>>"
-#define TEMPLATE_CPPSERVER_SIGCONSTRUCTOR "<stubname>(jsonrpc::AbstractServerConnector &conn) : jsonrpc::AbstractServer<<stubname>>(conn)"
+#define TEMPLATE_CPPSERVER_SIGCONSTRUCTOR "<stubname>(mem::shared_ptr<jsonrpc::AbstractServerConnector> conn) : jsonrpc::AbstractServer<<stubname>>(conn)"
 
 #define TEMPLATE_CPPSERVER_SIGMETHOD "inline virtual void <procedurename>I(const Json::Value &request, Json::Value &response)"
 #define TEMPLATE_CPPSERVER_SIGNOTIFICATION "inline virtual void <procedurename>I(const Json::Value &request)"
