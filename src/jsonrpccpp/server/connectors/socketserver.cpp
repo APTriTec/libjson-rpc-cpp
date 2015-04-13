@@ -141,7 +141,7 @@ error:
     int yes = 1;
     socket_ = socket(host_info_->ai_family, host_info_->ai_socktype, host_info_->ai_protocol);
     CHECK_SOCKET(socket_);
-    CHECK_STATUS(setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)));
+    CHECK_STATUS(setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, (char*)(&yes), sizeof(yes)));
     CHECK_STATUS(bind(socket_, host_info_->ai_addr, host_info_->ai_addrlen));
     CHECK_STATUS(listen(socket_, poolSize_));
     return;
