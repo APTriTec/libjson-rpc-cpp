@@ -25,6 +25,7 @@
   #define THREAD_ROUTINE_RETURN void*
 #endif
 
+int threadCreate(ThreadHandle*, ThreadStartRoutine, void*, unsigned long);
 int threadCreate(ThreadHandle*, ThreadStartRoutine, void*);
 
 int threadJoin(ThreadHandle);

@@ -95,7 +95,6 @@ error:
     MutexHandle lock;
     mutexCreate(&lock);
     int client_socket;
-
     while (!server->shutdown_) {
       if ((client_socket = accept(server->socket_, (struct sockaddr*)&client_addr, &addr_size)) > 0) {
         clients.push_back(new jsonrpc::SocketServer::Connection());
@@ -106,7 +105,7 @@ error:
         if (clients.size() > server->poolSize_) {
           CloseOldestConnection(clients);
         }
-        threadCreate(&clients.back()->thread, (ThreadStartRoutine)ConnectionHandler, clients.back());
+        threadCreate(&clients.back()->thread, (ThreadStartRoutine)ConnectionHandler, clients.back(), 10*1024);
       }
     }
     CloseAllConnections(clients);
@@ -119,15 +118,15 @@ error:
     Connection* connection = (Connection*)data;
     const int MAX_SIZE = 5000;
     char client_message[MAX_SIZE];
+    memset(client_message, 0, MAX_SIZE);
     int read_size;
-    std::string request;
     connection->finished = false;
+    std::string req;
     while((read_size = recv(connection->socket , client_message , MAX_SIZE, 0)) > 0) {
-      client_message[read_size] = '\0';
-      request.assign(client_message);
+      req.assign(&client_message[0], &client_message[read_size]);
       mutexLock(connection->plock_server);
       try {
-        connection->pserver->OnRequest(request, connection);
+        connection->pserver->OnRequest(req, connection);
       } catch (...) {
       }
       mutexUnlock(connection->plock_server);

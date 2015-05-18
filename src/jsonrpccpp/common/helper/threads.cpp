@@ -1,13 +1,17 @@
 #include "threads.h"
 
+int threadCreate(ThreadHandle* thread, ThreadStartRoutine routine, void *args) {
+  return threadCreate(thread, routine, args, 0);
+}
+
 #if defined(_WIN32)
   static int CONVERT_HANDLE_TO_STATUS(HANDLE h) {
     return h != NULL ? 0 : -1;
   }
 
-  int threadCreate(ThreadHandle* thread, ThreadStartRoutine routine, void *args)
+  int threadCreate(ThreadHandle* thread, ThreadStartRoutine routine, void *args, unsigned long stack_size)
   {
-    *thread = CreateThread(NULL, 0, routine, args, 0, NULL);
+    *thread = CreateThread(NULL, stack_size, routine, args, 0, NULL);
     return CONVERT_HANDLE_TO_STATUS(*thread);
   }
 
@@ -44,7 +48,7 @@
 
 #else
 
-  int threadCreate(ThreadHandle* thread, ThreadStartRoutine routine, void *args)
+  int threadCreate(ThreadHandle* thread, ThreadStartRoutine routine, void *args, unsigned long)
   {
     return pthread_create(thread, NULL, routine, args);
   }

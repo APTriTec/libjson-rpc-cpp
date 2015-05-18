@@ -23,7 +23,7 @@ namespace jsonrpc {
   class SocketServer : public AbstractServerConnector {
    public:
       SocketServer(const std::string& port = "8080", const int type = SOCK_STREAM, const int pool = 1) throw (JsonRpcException);
-      ~SocketServer();
+      virtual ~SocketServer();
 
       bool StartListening();
       bool StopListening();
@@ -43,7 +43,7 @@ namespace jsonrpc {
       int socket_;
       struct addrinfo* host_info_;
       bool shutdown_;
-      unsigned int poolSize_;
+      int poolSize_;
 
       void CreateSocket() throw (JsonRpcException);
       void CloseSocket();
