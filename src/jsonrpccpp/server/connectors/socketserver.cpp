@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <vector>
+#include <iostream>
 
 namespace jsonrpc {
 
@@ -115,6 +116,7 @@ error:
 
   THREAD_ROUTINE_RETURN SocketServer::ConnectionHandler(void* data)
   {
+    char EOT = 4;
     Connection* connection = (Connection*)data;
     const int MAX_SIZE = 5000;
     char client_message[MAX_SIZE];
@@ -122,14 +124,17 @@ error:
     int read_size;
     connection->finished = false;
     std::string req;
-    while((read_size = recv(connection->socket , client_message , MAX_SIZE, 0)) > 0) {
-      req.assign(&client_message[0], &client_message[read_size]);
-      mutexLock(connection->plock_server);
-      try {
-        connection->pserver->OnRequest(req, connection);
-      } catch (...) {
+    while ((read_size = recv(connection->socket, client_message, MAX_SIZE, 0)) > 0) {
+      req.append(&client_message[0], read_size);
+      if (client_message[read_size - 1] == EOT)
+      {
+        mutexLock(connection->plock_server);
+        try {
+          connection->pserver->OnRequest(req, connection);
+        } catch (...) {}
+        mutexUnlock(connection->plock_server);
+        req.clear();
       }
-      mutexUnlock(connection->plock_server);
       memset(client_message, 0, MAX_SIZE);
     }
     connection->finished = true;
