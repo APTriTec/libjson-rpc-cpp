@@ -54,7 +54,7 @@ else()
 endif()
 
 CPM_AddModule("jsoncpp"
-    GIT_REPOSITORY "https://github.com/bcachet/cpm-jsoncpp"
+    GIT_REPOSITORY "https://github.com/APTritec/cpm-jsoncpp"
     GIT_TAG origin/feature/ADD_INtimeSupport
     EXPORT_MODULE TRUE)
 
