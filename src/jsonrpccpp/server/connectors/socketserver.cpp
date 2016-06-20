@@ -121,6 +121,7 @@ error:
 
   THREAD_ROUTINE_RETURN SocketServer::ConnectionHandler(void* data)
   {
+    static const int KEEPALIVE_TIMEOUT_MS = 500; // time in ms to keep socket opened while inactive
     char EOT = 4;
     Connection* connection = (Connection*)data;
     const int MAX_SIZE = 5000;
@@ -128,6 +129,7 @@ error:
     int read_size;
     connection->finished = false;
     std::string req;
+    int keep_alive_timeout = KEEPALIVE_TIMEOUT_MS;
     do {
       req.clear();
       while ((read_size = recv(connection->socket, client_message, MAX_SIZE, 0)) > 0) {
@@ -137,6 +139,7 @@ error:
       }
       if ( read_size > 0 )
       {
+        keep_alive_timeout = KEEPALIVE_TIMEOUT_MS;
         if ( client_message[read_size - 1] == EOT )
         {
           mutexLock(connection->plock_server);
@@ -147,7 +150,13 @@ error:
         }
       }else if( read_size == 0 )
       {
-        usleep(1);
+        if ( keep_alive_timeout <= 0 )
+        {
+          read_size = -1; // timeout !
+        } else {
+          --keep_alive_timeout;
+          usleep(1);
+        }
       }
     } while( read_size != -1 );
     connection->finished = true;
