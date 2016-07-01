@@ -3,6 +3,11 @@
 #include <cstring>
 #include <vector>
 #include <iostream>
+#include <errno.h>
+#ifdef __INTIME__
+#include <EcOs.h>
+#define usleep(usec) OsSleep(usec)
+#endif
 
 namespace jsonrpc {
 
@@ -116,27 +121,44 @@ error:
 
   THREAD_ROUTINE_RETURN SocketServer::ConnectionHandler(void* data)
   {
+    static const int KEEPALIVE_TIMEOUT_MS = 500; // time in ms to keep socket opened while inactive
     char EOT = 4;
     Connection* connection = (Connection*)data;
     const int MAX_SIZE = 5000;
     char client_message[MAX_SIZE];
-    memset(client_message, 0, MAX_SIZE);
     int read_size;
     connection->finished = false;
     std::string req;
-    while ((read_size = recv(connection->socket, client_message, MAX_SIZE, 0)) > 0) {
-      req.append(&client_message[0], read_size);
-      if (client_message[read_size - 1] == EOT)
-      {
-        mutexLock(connection->plock_server);
-        try {
-          connection->pserver->OnRequest(req, connection);
-        } catch (...) {}
-        mutexUnlock(connection->plock_server);
-        req.clear();
+    int keep_alive_timeout = KEEPALIVE_TIMEOUT_MS;
+    do {
+      req.clear();
+      while ((read_size = recv(connection->socket, client_message, MAX_SIZE, 0)) > 0) {
+        req.append(&client_message[0], read_size);
+        if (client_message[read_size - 1] == EOT)
+          break;
       }
-      memset(client_message, 0, MAX_SIZE);
-    }
+      if ( read_size > 0 )
+      {
+        keep_alive_timeout = KEEPALIVE_TIMEOUT_MS;
+        if ( client_message[read_size - 1] == EOT )
+        {
+          mutexLock(connection->plock_server);
+          try {
+            connection->pserver->OnRequest(req, connection);
+          } catch (...) {}
+          mutexUnlock(connection->plock_server);
+        }
+      }else if( read_size == 0 )
+      {
+        if ( keep_alive_timeout <= 0 )
+        {
+          read_size = -1; // timeout !
+        } else {
+          --keep_alive_timeout;
+          usleep(1);
+        }
+      }
+    } while( read_size != -1 );
     connection->finished = true;
     return 0;
   }
