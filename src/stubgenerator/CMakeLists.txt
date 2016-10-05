@@ -44,7 +44,7 @@ CPM_AddModule("libjson-rpc-cpp"
   EXPORT_MODULE TRUE)
 
 CPM_AddModule("argtable3"
-    GIT_REPOSITORY "https://github.com/bcachet/cpm-argtable3.git"
+    GIT_REPOSITORY "https://github.com/aptritec/cpm-argtable3.git"
     GIT_TAG origin/master)
 
 CPM_Finish()
